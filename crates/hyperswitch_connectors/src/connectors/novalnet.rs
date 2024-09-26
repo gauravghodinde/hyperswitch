@@ -818,16 +818,8 @@ impl webhooks::IncomingWebhook for Novalnet {
         };
 
         if novalnet::is_refund_event(&notif.event.event_type) {
-            let parent_tid =
-                notif
-                    .event
-                    .parent_tid
-                    .ok_or(errors::ConnectorError::MissingRequiredField {
-                        field_name: "parent_tid",
-                    })?;
-
             Ok(api_models::webhooks::ObjectReferenceId::RefundId(
-                api_models::webhooks::RefundIdType::ConnectorRefundId(parent_tid.to_string()),
+                api_models::webhooks::RefundIdType::ConnectorRefundId(notif.event.tid.to_string()),
             ))
         } else {
             match transaction_order_no {
@@ -867,6 +859,10 @@ impl webhooks::IncomingWebhook for Novalnet {
             optional_transaction_status.ok_or(errors::ConnectorError::MissingRequiredField {
                 field_name: "transaction_status",
             })?;
+        // NOTE: transaction_status will always be present for Webhooks
+        // But we are handling optional type here, since we are reusing TransactionData Struct from NovalnetPaymentsResponseTransactionData for Webhooks response too 
+        // In NovalnetPaymentsResponseTransactionData, transaction_status is optional
+
         let incoming_webhook_event =
             novalnet::get_incoming_webhook_event(notif.event.event_type, transaction_status);
         Ok(incoming_webhook_event)
