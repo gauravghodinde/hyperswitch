@@ -860,7 +860,7 @@ impl webhooks::IncomingWebhook for Novalnet {
                 field_name: "transaction_status",
             })?;
         // NOTE: transaction_status will always be present for Webhooks
-        // But we are handling optional type here, since we are reusing TransactionData Struct from NovalnetPaymentsResponseTransactionData for Webhooks response too 
+        // But we are handling optional type here, since we are reusing TransactionData Struct from NovalnetPaymentsResponseTransactionData for Webhooks response too
         // In NovalnetPaymentsResponseTransactionData, transaction_status is optional
 
         let incoming_webhook_event =
