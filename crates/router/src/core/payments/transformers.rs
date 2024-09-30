@@ -1751,6 +1751,12 @@ impl<F: Clone> TryFrom<PaymentAdditionalData<'_, F>> for types::PaymentsAuthoriz
             .payment_intent
             .merchant_order_reference_id
             .clone();
+        let order_tax_amount = payment_data
+            .payment_intent
+            .tax_details
+            .clone()
+            .and_then(|tax| tax.payment_method_type.map(|pmt| pmt.order_tax_amount));
+
 
         Ok(Self {
             payment_method_data: (payment_method_data.get_required_value("payment_method_data")?),
@@ -1797,6 +1803,7 @@ impl<F: Clone> TryFrom<PaymentAdditionalData<'_, F>> for types::PaymentsAuthoriz
             charges,
             merchant_order_reference_id,
             integrity_object: None,
+            order_tax_amount,
         })
     }
 }
@@ -2048,11 +2055,12 @@ impl<F: Clone> TryFrom<PaymentAdditionalData<'_, F>> for types::SdkPaymentsSessi
             .payment_intent
             .tax_details
             .clone()
-            .and_then(|tax| tax.payment_method_type.map(|pmt| pmt.order_tax_amount))
-            .ok_or(errors::ApiErrorResponse::MissingRequiredField {
-                field_name: "order_tax_amount",
-            })?;
+            .and_then(|tax| tax.payment_method_type.map(|pmt| pmt.order_tax_amount));
         let amount = payment_data.payment_intent.amount;
+        let net_amount = match order_tax_amount {
+            Some(tax) => amount + tax,
+            None => amount,
+        };
 
         let order_details = additional_data
             .payment_data
@@ -2074,7 +2082,7 @@ impl<F: Clone> TryFrom<PaymentAdditionalData<'_, F>> for types::SdkPaymentsSessi
             .transpose()?;
 
         Ok(Self {
-            net_amount: amount + order_tax_amount, //need to change after we move to connector module
+            net_amount, //need to change after we move to connector module
             order_tax_amount,
             currency: payment_data.currency,
             session_id: payment_data.session_id,

@@ -226,6 +226,7 @@ impl ConnectorIntegration<CalculateTax, PaymentsTaxCalculationData, TaxCalculati
         event_builder: Option<&mut ConnectorEvent>,
         res: Response,
     ) -> CustomResult<PaymentsTaxCalculationRouterData, errors::ConnectorError> {
+        println!("$$$taxjarresponse{:?}", res.response);
         let response: taxjar::TaxjarPaymentsResponse = res
             .response
             .parse_struct("Taxjar PaymentsResponse")
