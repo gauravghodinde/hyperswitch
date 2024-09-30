@@ -209,7 +209,7 @@ impl TryFrom<&KlarnaRouterData<&types::SdkSessionUpdateRouterData>> for KlarnaSe
     ) -> Result<Self, Self::Error> {
         let request = &item.router_data.request;
         let net_amount = request.net_amount.get_amount_as_i64();
-         println!("$$$net_amount{:?}", item.amount);
+        println!("$$$net_amount{:?}", item.amount);
         // let order_tax_amout= 190;
         let order_tax_amount = request
             .order_tax_amount
@@ -224,7 +224,7 @@ impl TryFrom<&KlarnaRouterData<&types::SdkSessionUpdateRouterData>> for KlarnaSe
             Some(tax) => Some(tax as f64 / order_amount as f64),
             None => None,
         };
-       
+
         println!("$$$tax_rate{:?}", tax_rate);
         match request.order_details.clone() {
             Some(order_details) => Ok(Self {
@@ -233,7 +233,8 @@ impl TryFrom<&KlarnaRouterData<&types::SdkSessionUpdateRouterData>> for KlarnaSe
                 order_lines: order_details
                     .iter()
                     .map(|data| {
-                        let calculated_tax = tax_rate.map(|rate| (rate * data.amount as f64) as i64);
+                        let calculated_tax =
+                            tax_rate.map(|rate| (rate * data.amount as f64) as i64);
                         OrderLines {
                             name: data.product_name.clone(),
                             quantity: data.quantity,
@@ -261,17 +262,17 @@ impl TryFrom<&KlarnaRouterData<&types::PaymentsAuthorizeRouterData>> for KlarnaP
     ) -> Result<Self, Self::Error> {
         let request = &item.router_data.request;
         let amount = item.amount;
-        
+
         let order_tax_amount = request
             .order_tax_amount
             .as_ref()
             .map(|tax_amount| tax_amount.get_amount_as_i64());
-        
+
         let order_amount = match order_tax_amount {
             Some(tax) => amount - tax,
             None => amount,
         };
-        
+
         let tax_rate = match order_tax_amount {
             Some(tax) => Some(tax as f64 / order_amount as f64),
             None => None,
@@ -286,7 +287,8 @@ impl TryFrom<&KlarnaRouterData<&types::PaymentsAuthorizeRouterData>> for KlarnaP
                 order_lines: order_details
                     .iter()
                     .map(|data| {
-                        let calculated_tax = tax_rate.map(|rate| (rate * data.amount as f64) as i64);
+                        let calculated_tax =
+                            tax_rate.map(|rate| (rate * data.amount as f64) as i64);
                         OrderLines {
                             name: data.product_name.clone(),
                             quantity: data.quantity,
@@ -310,7 +312,6 @@ impl TryFrom<&KlarnaRouterData<&types::PaymentsAuthorizeRouterData>> for KlarnaP
         }
     }
 }
-
 
 fn get_address_info(
     address: Option<&payments::Address>,
